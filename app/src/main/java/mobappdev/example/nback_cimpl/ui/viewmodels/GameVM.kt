@@ -122,7 +122,6 @@ class GameVM(
         _score.value = newCorrect
     }
 
-    // --- VISUAL ---
     private suspend fun runVisualGame(events: Array<Int>) {
         for (i in events.indices) {
             _gameState.value = _gameState.value.copy(
@@ -141,7 +140,6 @@ class GameVM(
         }
     }
 
-    // --- AUDIO ---
     private suspend fun runAudioGame() {
         for (i in events.indices) {
             val value = events[i]
@@ -167,7 +165,6 @@ class GameVM(
         }
     }
 
-    // --- TextToSpeech ---
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             @Suppress("DEPRECATION")
