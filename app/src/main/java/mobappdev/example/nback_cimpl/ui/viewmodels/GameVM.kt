@@ -2,7 +2,6 @@ package mobappdev.example.nback_cimpl.ui.viewmodels
 
 import android.app.Application
 import android.speech.tts.TextToSpeech
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -49,6 +48,7 @@ class GameVM(
     private val _highscore = MutableStateFlow(0)
     override val highscore: StateFlow<Int> = _highscore
 
+
     override val nBack: Int = 2
     private val eventInterval: Long = 2000L
 
@@ -67,10 +67,12 @@ class GameVM(
     override fun startGame() {
         job?.cancel()
 
-        events = nBackHelper.generateNBackString(10, 9, 20, nBack)
-            .toList().toTypedArray()
-
-        Log.d("GameVM", "Sequence: ${events.contentToString()}")
+        events = nBackHelper.generateNBackString(10, 9, 30, nBack)
+            .map { raw ->
+                val mod = raw % 9
+                if (mod >= 0) mod else mod + 9
+            }
+            .toTypedArray()
 
         _gameState.value = GameState(
             gameType = _gameState.value.gameType,
@@ -89,9 +91,6 @@ class GameVM(
                 repeat(5) {
                     if (ttsReady) return@repeat
                     delay(200)
-                }
-                if (!ttsReady) {
-                    Log.e("GameVM", "TTS not ready, aborting audio game.")
                 }
             }
 
@@ -123,6 +122,7 @@ class GameVM(
         _score.value = newCorrect
     }
 
+    // --- VISUAL ---
     private suspend fun runVisualGame(events: Array<Int>) {
         for (i in events.indices) {
             _gameState.value = _gameState.value.copy(
@@ -141,6 +141,7 @@ class GameVM(
         }
     }
 
+    // --- AUDIO ---
     private suspend fun runAudioGame() {
         for (i in events.indices) {
             val value = events[i]
@@ -155,7 +156,6 @@ class GameVM(
             if (ttsReady && value in 0..letterMap.lastIndex) {
                 val letter = letterMap[value].toString()
                 tts?.speak(letter, TextToSpeech.QUEUE_FLUSH, null, "nback_audio_$i")
-                Log.d("GameVM", "Audio event $i: speaking '$letter'")
             }
 
             delay(eventInterval)
@@ -167,14 +167,14 @@ class GameVM(
         }
     }
 
+    // --- TextToSpeech ---
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             @Suppress("DEPRECATION")
-            tts?.language = Locale.US // eller Locale("sv", "SE")
+            tts?.language = Locale.US // or Locale("sv", "SE")
             ttsReady = true
-            Log.d("GameVM", "TTS initialized")
         } else {
-            Log.e("GameVM", "Failed to initialize TTS")
+            ttsReady = false
         }
     }
 
