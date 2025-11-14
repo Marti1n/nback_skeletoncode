@@ -168,7 +168,7 @@ class GameVM(
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             @Suppress("DEPRECATION")
-            tts?.language = Locale.US // or Locale("sv", "SE")
+            tts?.language = Locale.US
             ttsReady = true
         } else {
             ttsReady = false

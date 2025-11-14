@@ -94,7 +94,6 @@ fun GameScreen(
                 }
             }
 
-            // Snäll feedback på knappen
             val targetScale = when (state.feedback) {
                 Feedback.SUCCESS -> 1.5f
                 Feedback.ERROR -> 0.5f
